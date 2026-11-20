@@ -130,6 +130,7 @@
   <div class="result" id="result">
     <p>自己負担2,000円で済む寄附額の目安<br><span class="big" id="limitOut">-</span></p>
     <p>安全めの目安（目安の9割）<br><span class="safe" id="safeOut">-</span></p>
+    <p id="remainMaxOut"></p>
     <p id="remainOut"></p>
     <div class="warn">この計算は目安です。住宅ローン控除・医療費控除・iDeCoなどがある場合は実際の限度額が下がります。超えて寄附すると、超えた分は自己負担になります。正確な金額は、お住まいの市区町村や税務署、各ポータルサイトの詳細シミュレーションでご確認ください。</div>
   </div>
@@ -416,9 +417,12 @@ document.getElementById("calcBtn").addEventListener("click", function(){
   }
   const already = parseInt(document.getElementById("already").value, 10) || 0;
   const safe = Math.floor(limit * 0.9 / 1000) * 1000;
+  const remainMax = Math.max(0, limit - already);
   currentRemaining = Math.max(0, safe - already);
   document.getElementById("limitOut").textContent = limit.toLocaleString() + "円";
   document.getElementById("safeOut").textContent = safe.toLocaleString() + "円";
+  document.getElementById("remainMaxOut").innerHTML =
+    "すでに寄附した額を引くと、あと使える金額（上限）は <strong>" + remainMax.toLocaleString() + "円</strong> です。";
   document.getElementById("remainOut").innerHTML =
     "すでに寄附した額を引くと、あと使える金額（安全め）は <strong>" + currentRemaining.toLocaleString() + "円</strong> です。下の組み合わせ提案は、この金額を予算にします。";
   hideCalcNotice();
