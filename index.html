@@ -24,6 +24,9 @@
   button.sub{ background:var(--accent); }
   button.mini{ display:inline-block; width:auto; margin-top:0; padding:6px 14px; font-size:.88rem; background:#fff; color:var(--main); border:1.5px solid var(--main); }
   .genre-actions{ margin:12px 0 0; }
+  .budget-mode{ margin:14px 0 0; }
+  .budget-mode label{ margin-right:14px; white-space:nowrap; }
+  .budget-mode .now{ color:#555; font-size:.9rem; }
   .optnote{ font-size:.82rem; color:#777; margin-top:2px; }
   .vartag{ display:inline-block; margin-left:6px; padding:1px 7px; font-size:.72rem; font-weight:700; color:#b3541e; background:#fdf0e2; border:1px solid #e0a266; border-radius:999px; vertical-align:middle; white-space:nowrap; }
   button:disabled{ background:#bbb; cursor:not-allowed; }
@@ -139,6 +142,11 @@
 <section class="combo">
   <h2>2. 返礼品の組み合わせ提案</h2>
   <p style="margin-top:0">好きなジャンルを選ぶと、あと使える金額に収まる組み合わせを自動で探します。同じ金額の返礼品がある場合は、結果の各行で好みの品に入れ替えることもできます。</p>
+  <p class="budget-mode">組み合わせの予算：
+    <label><input type="radio" name="budgetMode" value="safe" checked> 安全め（目安の9割）で探す</label>
+    <label><input type="radio" name="budgetMode" value="max"> 目安（上限）で探す</label>
+    <span class="now" id="budgetNow"></span>
+  </p>
   <p class="genre-actions"><button type="button" class="mini" id="genreAllOn">すべてON</button> <button type="button" class="mini" id="genreAllOff">すべてOFF</button></p>
   <div class="chips" id="genres">
     <label><input type="checkbox" value="米" checked> 米</label>
@@ -397,6 +405,19 @@ function estimateLimit(incomeMan, spouse, dep1618, dep1922, ideco, lifeIns, quak
 }
 
 let currentRemaining = null; // あと使える金額（円）
+let budgetMode = "safe"; // "safe" = 安全め, "max" = 目安（上限）
+let remainByMode = null; // { safe: 円, max: 円 }
+function renderRemainTexts(){
+  if(!remainByMode) return;
+  document.getElementById("remainMaxOut").innerHTML =
+    "すでに寄附した額を引くと、あと使える金額（上限）は <strong>" + remainByMode.max.toLocaleString() + "円</strong> です。" +
+    (budgetMode === "max" ? "下の組み合わせ提案は、この金額を予算にします。" : "");
+  document.getElementById("remainOut").innerHTML =
+    "すでに寄附した額を引くと、あと使える金額（安全め）は <strong>" + remainByMode.safe.toLocaleString() + "円</strong> です。" +
+    (budgetMode === "safe" ? "下の組み合わせ提案は、この金額を予算にします。" : "");
+  document.getElementById("budgetNow").textContent =
+    "現在の予算：" + currentRemaining.toLocaleString() + "円（" + (budgetMode === "max" ? "目安（上限）" : "安全め") + "）";
+}
 
 document.getElementById("calcBtn").addEventListener("click", function(){
   const sw = parseInt(document.getElementById("shotokuwari").value, 10);
@@ -417,14 +438,11 @@ document.getElementById("calcBtn").addEventListener("click", function(){
   }
   const already = parseInt(document.getElementById("already").value, 10) || 0;
   const safe = Math.floor(limit * 0.9 / 1000) * 1000;
-  const remainMax = Math.max(0, limit - already);
-  currentRemaining = Math.max(0, safe - already);
+  remainByMode = { safe: Math.max(0, safe - already), max: Math.max(0, limit - already) };
+  currentRemaining = remainByMode[budgetMode];
   document.getElementById("limitOut").textContent = limit.toLocaleString() + "円";
   document.getElementById("safeOut").textContent = safe.toLocaleString() + "円";
-  document.getElementById("remainMaxOut").innerHTML =
-    "すでに寄附した額を引くと、あと使える金額（上限）は <strong>" + remainMax.toLocaleString() + "円</strong> です。";
-  document.getElementById("remainOut").innerHTML =
-    "すでに寄附した額を引くと、あと使える金額（安全め）は <strong>" + currentRemaining.toLocaleString() + "円</strong> です。下の組み合わせ提案は、この金額を予算にします。";
+  renderRemainTexts();
   hideCalcNotice();
   hideComboNotice();
   document.getElementById("result").style.display = "block";
@@ -443,6 +461,8 @@ function hideCalcNotice(){
 function invalidateCalc(){
   if(currentRemaining === null) return;
   currentRemaining = null;
+  remainByMode = null;
+  document.getElementById("budgetNow").textContent = "";
   document.getElementById("result").style.display = "none";
   document.getElementById("comboResult").style.display = "none";
   document.getElementById("comboPlaceholder").style.display = "";
@@ -591,12 +611,24 @@ function hideComboNotice(){
 function setAllGenres(on){
   Array.prototype.forEach.call(document.querySelectorAll("#genres input"), function(el){ el.checked = on; });
 }
+document.querySelectorAll('input[name="budgetMode"]').forEach(function(r){
+  r.addEventListener("change", function(){
+    budgetMode = r.value;
+    if(remainByMode){
+      currentRemaining = remainByMode[budgetMode];
+      renderRemainTexts();
+      document.getElementById("comboResult").style.display = "none";
+      document.getElementById("comboPlaceholder").style.display = "";
+      showComboNotice("予算の基準を変更しました。もう一度「組み合わせを探す」を押してください。");
+    }
+  });
+});
 document.getElementById("genreAllOn").addEventListener("click", function(){ setAllGenres(true); });
 document.getElementById("genreAllOff").addEventListener("click", function(){ setAllGenres(false); });
 
 document.getElementById("comboBtn").addEventListener("click", function(){
   if(currentRemaining === null){ showComboNotice("先に「1. 限度額の目安を計算する」で限度額を計算してください。その金額を予算にして組み合わせを探します。"); return; }
-  if(currentRemaining <= 0){ showComboNotice("あと使える金額が0円です。今年すでに寄附した額が、安全めの目安以上になっています。"); return; }
+  if(currentRemaining <= 0){ showComboNotice("あと使える金額が0円です。今年すでに寄附した額が、" + (budgetMode === "max" ? "目安（上限）" : "安全めの目安") + "以上になっています。"); return; }
   const checked = Array.prototype.map.call(
     document.querySelectorAll("#genres input:checked"), function(el){ return el.value; });
   if(checked.length === 0){ showComboNotice("ジャンルを1つ以上選んでください。"); return; }
