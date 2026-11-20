@@ -24,6 +24,7 @@
   button.sub{ background:var(--accent); }
   button.mini{ display:inline-block; width:auto; margin-top:0; padding:6px 14px; font-size:.88rem; background:#fff; color:var(--main); border:1.5px solid var(--main); }
   .genre-actions{ margin:12px 0 0; }
+  .vartag{ display:inline-block; margin-left:6px; padding:1px 7px; font-size:.72rem; font-weight:700; color:#b3541e; background:#fdf0e2; border:1px solid #e0a266; border-radius:999px; vertical-align:middle; white-space:nowrap; }
   button:disabled{ background:#bbb; cursor:not-allowed; }
   .result{ display:none; }
   .combo-placeholder{ border:2px dashed var(--line); border-radius:10px; min-height:200px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--muted); margin-top:16px; padding:16px; font-size:.92rem; }
@@ -160,9 +161,9 @@
       <tbody id="comboBody"></tbody>
     </table>
     <p id="comboSum"></p>
-    <p class="note" id="comboVarNote" style="display:none">※の品目は、品種・容量・サイズなどの選択によって寄附額が変わる場合があります。表示している金額は最低価格のため、選ぶ内容によって合計金額が変わります。</p>
+    <p class="note" id="comboVarNote" style="display:none">「選択で金額が変わります」と表示された品目は、品種・容量・サイズなどの選択によって寄附額が変わる場合があります。表示している金額は最低価格のため、選ぶ内容によって合計金額が変わります。</p>
     <p><button class="sub" id="copyBtn">組み合わせをコピーする</button></p>
-    <p class="note">※寄附額は2026年11月20日時点の各返礼品の最低価格です。内容量が選べる返礼品は、最低価格の内容量で表示しています。※印の品目は、品種・容量・サイズなどの選択によって寄附額が変わる場合があります。最新の価格と内容は、リンク先の楽天市場の商品ページでご確認ください。</p>
+    <p class="note">※寄附額は2026年11月20日時点の各返礼品の最低価格です。内容量が選べる返礼品は、最低価格の内容量で表示しています。「選択で金額が変わります」と表示された品目は、品種・容量・サイズなどの選択によって寄附額が変わる場合があります。最新の価格と内容は、リンク先の楽天市場の商品ページでご確認ください。</p>
   </div>
 </section>
 
@@ -188,7 +189,7 @@
     <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">評価（レビュー件数）</th><th></th></tr></thead>
     <tbody id="allBody"></tbody>
   </table>
-  <p class="note">※評価（★）・レビュー件数・寄附額は2026年11月20日時点の各商品ページの表記です。寄附額は、内容量が選べる返礼品では最低価格を表示しています。※印の品目は、選択によって寄附額が変わる場合があります。評価が確認できなかった品目は「★—」、レビュー件数が確認できなかった品目は「—」で表示しています。</p>
+  <p class="note">※評価（★）・レビュー件数・寄附額は2026年11月20日時点の各商品ページの表記です。寄附額は、内容量が選べる返礼品では最低価格を表示しています。「選択で金額が変わります」と表示された品目は、選択によって寄附額が変わる場合があります。評価が確認できなかった品目は「★—」、レビュー件数が確認できなかった品目は「—」で表示しています。</p>
 </section>
 
 <section>
@@ -500,7 +501,8 @@ function preferHigherRated(combo, pool){
   return combo;
 }
 
-function dispName(it){ return it.name + (it.v ? " ※" : ""); }
+function dispName(it){ return it.name + (it.v ? "（選択で金額が変わります）" : ""); }
+function dispNameHtml(it){ return it.name + (it.v ? ' <span class="vartag">選択で金額が変わります</span>' : ""); }
 
 function renderCombo(){
   const body = document.getElementById("comboBody");
@@ -529,7 +531,7 @@ function renderCombo(){
     const rev = it.reviews ? it.reviews.toLocaleString() + "件" : "—";
     const star = it.rating ? "★" + it.rating.toFixed(2) : "★—";
     const evalCell = (it.rating || it.reviews) ? star + "（" + rev + "）" : "—";
-    tr.innerHTML = "<td>" + dispName(it) + swap + "</td><td>" + it.genre + "</td><td class='price'>" +
+    tr.innerHTML = "<td>" + dispNameHtml(it) + swap + "</td><td>" + it.genre + "</td><td class='price'>" +
       it.price.toLocaleString() + "円</td><td class='price'>" + evalCell + "</td><td>" + link + "</td>";
     body.appendChild(tr);
   });
@@ -619,7 +621,7 @@ function renderCatalog(){
     const rev = it.reviews ? it.reviews.toLocaleString() + "件" : "—";
     const star = it.rating ? "★" + it.rating.toFixed(2) : "★—";
     const evalCell = (it.rating || it.reviews) ? star + "（" + rev + "）" : "—";
-    tr.innerHTML = "<td>" + dispName(it) + "</td><td>" + it.genre + "</td><td class='price'>" +
+    tr.innerHTML = "<td>" + dispNameHtml(it) + "</td><td>" + it.genre + "</td><td class='price'>" +
       it.price.toLocaleString() + "円</td><td class='price'>" + evalCell + "</td><td>" +
       '<a class="btn" href="' + it.url + '" target="_blank" rel="nofollow sponsored noopener">見に行く</a></td>';
     body.appendChild(tr);
