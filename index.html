@@ -37,6 +37,8 @@
   footer{ text-align:center; color:var(--muted); font-size:.8rem; padding:0 14px 30px; }
   a.btn{ display:inline-block; padding:5px 12px; background:var(--accent); color:#fff; border-radius:6px; text-decoration:none; font-size:.85rem; font-weight:700; }
   span.btn-off{ display:inline-block; padding:5px 12px; background:#ddd; color:#888; border-radius:6px; font-size:.85rem; }
+  .swapbox{ margin-top:6px; font-size:.83rem; color:var(--muted); }
+  select.swap{ max-width:340px; padding:6px; font-size:.88rem; margin-top:2px; }
 </style>
 </head>
 <body>
@@ -104,7 +106,7 @@
 
 <section>
   <h2>2. 返礼品の組み合わせ提案</h2>
-  <p style="margin-top:0">好きなジャンルを選ぶと、あと使える金額に収まる組み合わせを自動で探します。</p>
+  <p style="margin-top:0">好きなジャンルを選ぶと、あと使える金額に収まる組み合わせを自動で探します。同じ金額の返礼品がある場合は、結果の各行で好みの品に入れ替えることもできます。</p>
   <div class="chips" id="genres">
     <label><input type="checkbox" value="米" checked> 米</label>
     <label><input type="checkbox" value="肉" checked> 肉</label>
@@ -285,29 +287,55 @@ function bestCombo(items, budget){
   return [];
 }
 
-document.getElementById("comboBtn").addEventListener("click", function(){
-  if(currentRemaining === null){ alert("先に「1. 限度額の目安を計算する」で計算してください"); return; }
-  if(currentRemaining <= 0){ alert("あと使える金額が0円です"); return; }
-  const checked = Array.prototype.map.call(
-    document.querySelectorAll("#genres input:checked"), function(el){ return el.value; });
-  const pool = ITEMS.filter(function(it){ return checked.indexOf(it.genre) >= 0; });
-  const combo = bestCombo(pool, currentRemaining);
+let currentCombo = [];
+let currentPool = [];
+
+function renderCombo(){
   const body = document.getElementById("comboBody");
   body.innerHTML = "";
   let sum = 0;
-  combo.forEach(function(it){
+  currentCombo.forEach(function(it, idx){
     sum += it.price;
     const tr = document.createElement("tr");
     const link = it.url
       ? '<a class="btn" href="' + it.url + '" target="_blank" rel="nofollow sponsored noopener">見に行く</a>'
       : '<span class="btn-off">リンク準備中</span>';
-    tr.innerHTML = "<td>" + it.name + "</td><td>" + it.genre + "</td><td class='price'>" +
+    const alts = currentPool.filter(function(p){
+      return p.price === it.price && currentCombo.indexOf(p) < 0;
+    });
+    let swap = "";
+    if(alts.length){
+      const opts = alts.map(function(a){
+        return '<option value="' + ITEMS.indexOf(a) + '">' + a.name + "（" + a.genre + "）</option>";
+      }).join("");
+      swap = '<div class="swapbox">同額の別の返礼品と入れ替えできます<br>' +
+        '<select class="swap" data-idx="' + idx + '"><option value="">入れ替える場合は選択</option>' + opts + "</select></div>";
+    }
+    tr.innerHTML = "<td>" + it.name + swap + "</td><td>" + it.genre + "</td><td class='price'>" +
       it.price.toLocaleString() + "円</td><td>" + link + "</td>";
     body.appendChild(tr);
+  });
+  Array.prototype.forEach.call(body.querySelectorAll("select.swap"), function(sel){
+    sel.addEventListener("change", function(){
+      if(sel.value === "") return;
+      const idx = parseInt(sel.getAttribute("data-idx"), 10);
+      currentCombo[idx] = ITEMS[parseInt(sel.value, 10)];
+      renderCombo();
+    });
   });
   document.getElementById("comboSum").innerHTML =
     "合計 <strong>" + sum.toLocaleString() + "円</strong> ／ 予算 " + currentRemaining.toLocaleString() +
     "円（残り " + (currentRemaining - sum).toLocaleString() + "円）";
+}
+
+document.getElementById("comboBtn").addEventListener("click", function(){
+  if(currentRemaining === null){ alert("先に「1. 限度額の目安を計算する」で計算してください"); return; }
+  if(currentRemaining <= 0){ alert("あと使える金額が0円です"); return; }
+  const checked = Array.prototype.map.call(
+    document.querySelectorAll("#genres input:checked"), function(el){ return el.value; });
+  currentPool = ITEMS.filter(function(it){ return checked.indexOf(it.genre) >= 0; });
+  currentCombo = bestCombo(currentPool, currentRemaining);
+  renderCombo();
   document.getElementById("comboResult").style.display = "block";
 });
 
