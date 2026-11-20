@@ -131,7 +131,7 @@
   <div class="result" id="comboResult">
     <p class="combo-label">▼ 組み合わせ結果</p>
     <table>
-      <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th></th></tr></thead>
+      <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">評価（レビュー件数）</th><th></th></tr></thead>
       <tbody id="comboBody"></tbody>
     </table>
     <p id="comboSum"></p>
@@ -437,6 +437,33 @@ function bestCombo(items, budget){
 let currentCombo = [];
 let currentPool = [];
 
+// 同じ金額の品が複数あるときは、評価（同点ならレビュー件数）が高い方を優先する
+function preferHigherRated(combo, pool){
+  const used = new Set(combo);
+  let changed = true;
+  while(changed){
+    changed = false;
+    for(let i = 0; i < combo.length; i++){
+      const cur = combo[i];
+      let best = cur;
+      pool.forEach(function(p){
+        if(p.price !== cur.price || used.has(p)) return;
+        if((p.rating || 0) > (best.rating || 0) ||
+           ((p.rating || 0) === (best.rating || 0) && (p.reviews || 0) > (best.reviews || 0))){
+          best = p;
+        }
+      });
+      if(best !== cur){
+        used.delete(cur);
+        used.add(best);
+        combo[i] = best;
+        changed = true;
+      }
+    }
+  }
+  return combo;
+}
+
 function renderCombo(){
   const body = document.getElementById("comboBody");
   body.innerHTML = "";
@@ -449,17 +476,23 @@ function renderCombo(){
       : '<span class="btn-off">リンク準備中</span>';
     const alts = currentPool.filter(function(p){
       return p.price === it.price && currentCombo.indexOf(p) < 0;
+    }).sort(function(a, b){
+      return (b.rating || 0) - (a.rating || 0) || (b.reviews || 0) - (a.reviews || 0);
     });
     let swap = "";
     if(alts.length){
       const opts = alts.map(function(a){
-        return '<option value="' + ITEMS.indexOf(a) + '">' + a.name + "（" + a.genre + "）</option>";
+        const r = a.rating ? "・★" + a.rating.toFixed(2) : "";
+        return '<option value="' + ITEMS.indexOf(a) + '">' + a.name + "（" + a.genre + r + "）</option>";
       }).join("");
       swap = '<div class="swapbox">同額の別の返礼品と入れ替えできます<br>' +
         '<select class="swap" data-idx="' + idx + '"><option value="">入れ替える場合は選択</option>' + opts + "</select></div>";
     }
+    const rev = it.reviews ? it.reviews.toLocaleString() + "件" : "—";
+    const star = it.rating ? "★" + it.rating.toFixed(2) : "★—";
+    const evalCell = (it.rating || it.reviews) ? star + "（" + rev + "）" : "—";
     tr.innerHTML = "<td>" + it.name + swap + "</td><td>" + it.genre + "</td><td class='price'>" +
-      it.price.toLocaleString() + "円</td><td>" + link + "</td>";
+      it.price.toLocaleString() + "円</td><td class='price'>" + evalCell + "</td><td>" + link + "</td>";
     body.appendChild(tr);
   });
   Array.prototype.forEach.call(body.querySelectorAll("select.swap"), function(sel){
@@ -491,7 +524,7 @@ document.getElementById("comboBtn").addEventListener("click", function(){
     document.querySelectorAll("#genres input:checked"), function(el){ return el.value; });
   if(checked.length === 0){ showComboNotice("ジャンルを1つ以上選んでください。"); return; }
   currentPool = ITEMS.filter(function(it){ return checked.indexOf(it.genre) >= 0; });
-  currentCombo = bestCombo(currentPool, currentRemaining);
+  currentCombo = preferHigherRated(bestCombo(currentPool, currentRemaining), currentPool);
   renderCombo();
   hideComboNotice();
   document.getElementById("comboResult").style.display = "block";
