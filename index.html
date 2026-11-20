@@ -24,6 +24,7 @@
   button.sub{ background:var(--accent); }
   button:disabled{ background:#bbb; cursor:not-allowed; }
   .result{ display:none; }
+  .combo-placeholder{ border:2px dashed var(--line); border-radius:10px; min-height:130px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--muted); margin-top:16px; padding:16px; font-size:.92rem; }
   .big{ font-size:1.9rem; font-weight:800; color:var(--main); }
   .safe{ font-size:1.15rem; font-weight:700; color:#2e7d32; }
   table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:.95rem; }
@@ -117,6 +118,7 @@
         <label><input type="checkbox" value="日用品" checked> 日用品</label>
   </div>
   <button class="sub" id="comboBtn">組み合わせを探す</button>
+  <div class="combo-placeholder" id="comboPlaceholder">「組み合わせを探す」を押すと、ここに結果が表示されます</div>
   <div class="result" id="comboResult">
     <table>
       <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th></th></tr></thead>
@@ -398,6 +400,7 @@ document.getElementById("comboBtn").addEventListener("click", function(){
   currentCombo = bestCombo(currentPool, currentRemaining);
   renderCombo();
   document.getElementById("comboResult").style.display = "block";
+  document.getElementById("comboPlaceholder").style.display = "none";
 });
 
 // ---- 返礼品一覧（人気順：レビュー件数の多い順） ----
