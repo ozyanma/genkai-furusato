@@ -25,6 +25,7 @@
   button:disabled{ background:#bbb; cursor:not-allowed; }
   .result{ display:none; }
   .combo-placeholder{ border:2px dashed var(--line); border-radius:10px; min-height:200px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--muted); margin-top:16px; padding:16px; font-size:.92rem; }
+  .combo-notice{ background:#fdf3d7; border:1px solid #e3c766; border-radius:8px; padding:10px 14px; margin:14px 0 0; font-size:.92rem; }
   .combo-label{ margin:14px 0 0; font-size:.88rem; font-weight:700; color:var(--accent); }
   section.combo{ margin-bottom:38px; padding-bottom:26px; }
   .big{ font-size:1.9rem; font-weight:800; color:var(--main); }
@@ -124,6 +125,7 @@
         <label><input type="checkbox" value="キッチン用品" checked> キッチン用品</label>
   </div>
   <button class="sub" id="comboBtn">組み合わせを探す</button>
+  <p class="combo-notice" id="comboNotice" style="display:none"></p>
   <div class="combo-placeholder" id="comboPlaceholder">▼<br>「組み合わせを探す」を押すと、ここに結果が表示されます</div>
   <div class="result" id="comboResult">
     <p class="combo-label">▼ 組み合わせ結果</p>
@@ -364,6 +366,7 @@ document.getElementById("calcBtn").addEventListener("click", function(){
   document.getElementById("safeOut").textContent = safe.toLocaleString() + "円";
   document.getElementById("remainOut").innerHTML =
     "すでに寄附した額を引くと、あと使える金額（安全め）は <strong>" + currentRemaining.toLocaleString() + "円</strong> です。下の組み合わせ提案は、この金額を予算にします。";
+  hideComboNotice();
   document.getElementById("result").style.display = "block";
 });
 
@@ -429,14 +432,24 @@ function renderCombo(){
     "円（残り " + (currentRemaining - sum).toLocaleString() + "円）";
 }
 
+function showComboNotice(msg){
+  const n = document.getElementById("comboNotice");
+  n.textContent = msg;
+  n.style.display = "block";
+}
+function hideComboNotice(){
+  document.getElementById("comboNotice").style.display = "none";
+}
+
 document.getElementById("comboBtn").addEventListener("click", function(){
-  if(currentRemaining === null){ alert("先に「1. 限度額の目安を計算する」で計算してください"); return; }
-  if(currentRemaining <= 0){ alert("あと使える金額が0円です"); return; }
+  if(currentRemaining === null){ showComboNotice("先に「1. 限度額の目安を計算する」で限度額を計算してください。その金額を予算にして組み合わせを探します。"); return; }
+  if(currentRemaining <= 0){ showComboNotice("あと使える金額が0円です。今年すでに寄附した額が、安全めの目安以上になっています。"); return; }
   const checked = Array.prototype.map.call(
     document.querySelectorAll("#genres input:checked"), function(el){ return el.value; });
   currentPool = ITEMS.filter(function(it){ return checked.indexOf(it.genre) >= 0; });
   currentCombo = bestCombo(currentPool, currentRemaining);
   renderCombo();
+  hideComboNotice();
   document.getElementById("comboResult").style.display = "block";
   document.getElementById("comboPlaceholder").style.display = "none";
 });
