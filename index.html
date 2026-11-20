@@ -24,7 +24,9 @@
   button.sub{ background:var(--accent); }
   button:disabled{ background:#bbb; cursor:not-allowed; }
   .result{ display:none; }
-  .combo-placeholder{ border:2px dashed var(--line); border-radius:10px; min-height:130px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--muted); margin-top:16px; padding:16px; font-size:.92rem; }
+  .combo-placeholder{ border:2px dashed var(--line); border-radius:10px; min-height:200px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--muted); margin-top:16px; padding:16px; font-size:.92rem; }
+  .combo-label{ margin:14px 0 0; font-size:.88rem; font-weight:700; color:var(--accent); }
+  section.combo{ margin-bottom:38px; padding-bottom:26px; }
   .big{ font-size:1.9rem; font-weight:800; color:var(--main); }
   .safe{ font-size:1.15rem; font-weight:700; color:#2e7d32; }
   table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:.95rem; }
@@ -105,7 +107,7 @@
   </div>
 </section>
 
-<section>
+<section class="combo">
   <h2>2. 返礼品の組み合わせ提案</h2>
   <p style="margin-top:0">好きなジャンルを選ぶと、あと使える金額に収まる組み合わせを自動で探します。同じ金額の返礼品がある場合は、結果の各行で好みの品に入れ替えることもできます。</p>
   <div class="chips" id="genres">
@@ -115,11 +117,16 @@
     <label><input type="checkbox" value="果物" checked> 果物</label>
     <label><input type="checkbox" value="スイーツ" checked> スイーツ</label>
     <label><input type="checkbox" value="飲料" checked> 飲料</label>
+        <label><input type="checkbox" value="酒" checked> 酒</label>
         <label><input type="checkbox" value="日用品" checked> 日用品</label>
+        <label><input type="checkbox" value="ペット用品" checked> ペット用品</label>
+        <label><input type="checkbox" value="タオル・寝具" checked> タオル・寝具</label>
+        <label><input type="checkbox" value="キッチン用品" checked> キッチン用品</label>
   </div>
   <button class="sub" id="comboBtn">組み合わせを探す</button>
-  <div class="combo-placeholder" id="comboPlaceholder">「組み合わせを探す」を押すと、ここに結果が表示されます</div>
+  <div class="combo-placeholder" id="comboPlaceholder">▼<br>「組み合わせを探す」を押すと、ここに結果が表示されます</div>
   <div class="result" id="comboResult">
+    <p class="combo-label">▼ 組み合わせ結果</p>
     <table>
       <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th></th></tr></thead>
       <tbody id="comboBody"></tbody>
@@ -131,7 +138,7 @@
 
 <section>
   <h2>3. 返礼品一覧（人気順）</h2>
-  <p style="margin-top:0">掲載中の全108品を、楽天市場でのレビュー件数が多い順に並べています。上の組み合わせ提案の対象も、この一覧の品目です。</p>
+  <p style="margin-top:0">掲載中の全139品を、楽天市場でのレビュー件数が多い順に並べています。上の組み合わせ提案の対象も、この一覧の品目です。</p>
   <table>
     <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">レビュー</th><th></th></tr></thead>
     <tbody id="allBody"></tbody>
@@ -241,7 +248,6 @@ const ITEMS = [
   { name:"訳ありブレンドコーヒー豆・粉 600g（岡山県高梁市）", genre:"飲料", price:7000, reviews:1388, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff332097-takahashi%2F56150207%2F&link_type=text" },
   { name:"飲むみかん 有田みかんジュース 180ml×12本（和歌山県有田市）", genre:"飲料", price:10000, reviews:695, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff302040-arida%2F13%2F&link_type=text" },
   { name:"温泉水99 11.5L×2箱（鹿児島県垂水市）", genre:"飲料", price:16000, reviews:44, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff462144-tarumizu%2Fa1-0827%2F&link_type=text" },
-  { name:"よなよなエール 350ml×24缶（大阪府泉佐野市）", genre:"飲料", price:17000, reviews:2503, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff272132-izumisano%2Fg003a%2F&link_type=text" },
   { name:"富士山蒼天の水 ラベルレス 500ml×96本（山梨県忍野村）", genre:"飲料", price:16000, reviews:805, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff194247-oshino%2F9503-30030313%2F&link_type=text" },
   { name:"ポンジュース 800ml×6本／280ml×24本（愛媛県松山市）", genre:"飲料", price:10000, reviews:677, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff382019-matsuyama%2Ff21q-433%2F&link_type=text" },
   { name:"ヨーグルッペ 200ml×36本（宮崎県都城市）", genre:"飲料", price:11000, reviews:178, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff452025-miyakonojo%2Faa-2301%2F&link_type=text" },
@@ -250,9 +256,17 @@ const ITEMS = [
   { name:"伊藤園 健康ミネラルむぎ茶 650ml×24本（宮崎県川南町）", genre:"飲料", price:12000, reviews:46, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff454052-kawaminami%2Fg7307%2F&link_type=text" },
   { name:"UCC 職人の珈琲 ボトルコーヒー無糖 900ml×12本（滋賀県愛荘町）", genre:"飲料", price:12000, reviews:4, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff254258-aisho%2Fr19524508%2F&link_type=text" },
   { name:"焙煎職人こだわりのコーヒー 250g/500g（宮崎県都城市）", genre:"飲料", price:3000, reviews:1352, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff452025-miyakonojo%2Fla-3302%2F&link_type=text" },
-  { name:"日本酒「匠」飲み比べ 720ml×3本（京都府京都市）", genre:"飲料", price:10000, reviews:1320, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff261009-kyoto%2Fb2329-r%2F&link_type=text" },
   { name:"VOX強炭酸水 500ml×35本（山梨県富士吉田市）", genre:"飲料", price:5800, reviews:1305, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff192023-fujiyoshida%2Ff181-001%2F&link_type=text" },
   { name:"ドリップコーヒー詰め合わせ 50袋/100袋（大阪府泉佐野市）", genre:"飲料", price:9000, reviews:1244, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff272132-izumisano%2F005a076%2F&link_type=text" },
+  { name:"よなよなエール 350ml×24缶（大阪府泉佐野市）", genre:"酒", price:17000, reviews:2503, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff272132-izumisano%2Fg003a%2F&link_type=text" },
+  { name:"日本酒「匠」飲み比べ 720ml×3本（京都府京都市）", genre:"酒", price:10000, reviews:1320, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff261009-kyoto%2Fb2329-r%2F&link_type=text" },
+  { name:"アサヒ スーパードライ 350ml×24本〜（茨城県守谷市）", genre:"酒", price:14500, reviews:1269, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff082244-moriya%2F55840311%2F&link_type=text" },
+  { name:"黒霧島パック（25度）1.8L×5本（宮崎県都城市）", genre:"酒", price:29000, reviews:1077, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff452025-miyakonojo%2Fad-0708_99%2F&link_type=text" },
+  { name:"麦王パック 1.8L×6本（鹿児島県曽於市）", genre:"酒", price:16000, reviews:736, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff462179-soo%2Fs406%2F&link_type=text" },
+  { name:"甲州韮崎ウイスキー飲み比べ 700ml×3本〜（山梨県韮崎市）", genre:"酒", price:9000, reviews:372, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff192074-nirasaki%2F3-3%2F&link_type=text" },
+  { name:"山本本家 神聖 飲み比べセット 720ml×3本（京都府京都市）", genre:"酒", price:10000, reviews:340, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff261009-kyoto%2Fb-am09%2F&link_type=text" },
+  { name:"一升瓶ワイン 赤・白 1.8L×3本〜（山梨県韮崎市）", genre:"酒", price:18000, reviews:187, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff192074-nirasaki%2F3-4%2F&link_type=text" },
+  { name:"福智山ダム熟成 赤白ワイン 750ml×4本（福岡県直方市）", genre:"酒", price:14000, reviews:52, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff402044-nogatashi%2F090-2702%2F&link_type=text" },
   { name:"トイレットペーパー ダブル 24/64/72ロール（静岡県沼津市）", genre:"日用品", price:7500, reviews:6499, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff222038-numazu%2Ftsurumi03-p%2F&link_type=text" },
   { name:"スコッティ フラワーパック 3倍長持ち ダブル 24ロール（埼玉県草加市）", genre:"日用品", price:15000, reviews:2617, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff112216-soka%2F56710310%2F&link_type=text" },
   { name:"クラリス ボックスティッシュ 220組×60箱（栃木県小山市）", genre:"日用品", price:16500, reviews:2234, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff092088-oyama%2F1256759%2F&link_type=text" },
@@ -265,6 +279,30 @@ const ITEMS = [
   { name:"ルックプラス バスタブクレンジング 選べる詰替800ml（千葉県市原市）", genre:"日用品", price:8000, reviews:67, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff122190-ichihara%2F56890543%2F&link_type=text" },
   { name:"キュキュット つめかえ用 1250ml×6本（神奈川県川崎市）", genre:"日用品", price:16000, reviews:58, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff141305-kawasaki%2Fff06%2F&link_type=text" },
   { name:"いち髪 濃密W保湿ケア シャンプー＆コンディショナー詰替 各5袋（愛知県愛西市）", genre:"日用品", price:20000, reviews:44, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff232327-aisai%2Faebe002%2F&link_type=text" },
+  { name:"ペット用ジビエ鹿肉 生肉1kg〜（岡山県西粟倉村）", genre:"ペット用品", price:10000, reviews:141, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff336432-nishiawakura%2Ffurusaton-056%2F&link_type=text" },
+  { name:"デオシートしっかり超吸収 レギュラー112枚×4袋〜（福島県棚倉町）", genre:"ペット用品", price:26500, reviews:86, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff074811-tanagura%2F1043195%2F&link_type=text" },
+  { name:"エゾシカ角ドッグガム 約8cm×1本 小型犬用（北海道白老町）", genre:"ペット用品", price:2000, reviews:78, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff015784-shiraoi%2Fbo001%2F&link_type=text" },
+  { name:"ねこのおふとんOFURO 猫用ベッド（宮崎県都城市）", genre:"ペット用品", price:12500, reviews:54, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff452025-miyakonojo%2F12-j201%2F&link_type=text" },
+  { name:"ジビエドッグフード鹿肉ドライ500g（兵庫県多可町）", genre:"ペット用品", price:7000, reviews:39, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff283657-taka%2F211%2F&link_type=text" },
+  { name:"ネオ砂おから 猫砂10L×5袋〜（静岡県富士市）", genre:"ペット用品", price:20000, reviews:35, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff222101-fuji%2F1066%2F&link_type=text" },
+  { name:"ねこ様用かつおセット 50g×5袋〜（静岡県焼津市）", genre:"ペット用品", price:12000, reviews:30, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff222127-yaizu%2Fa10-417%2F&link_type=text" },
+  { name:"たまの伝説キャットフード缶詰 70g×24缶（静岡県焼津市）", genre:"ペット用品", price:12000, reviews:28, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff222127-yaizu%2Fa11-088%2F&link_type=text" },
+  { name:"洗える羽毛肌掛けふとん 選べる4サイズ（山梨県富士吉田市）", genre:"タオル・寝具", price:35000, reviews:2363, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff192023-fujiyoshida%2Fraku24%2F&link_type=text" },
+  { name:"今治タオル ヒオリエ 贅沢フェイスタオル 3〜12枚（愛媛県今治市）", genre:"タオル・寝具", price:13000, reviews:667, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff382027-imabari%2Fi001160%2F&link_type=text" },
+  { name:"今治タオル ヒオリエ 贅沢バスタオル 2〜4枚（愛媛県今治市）", genre:"タオル・寝具", price:20500, reviews:631, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff382027-imabari%2Fi001130%2F&link_type=text" },
+  { name:"泉州タオル ヒオリエ フェイスタオル 選べる5枚・10枚（大阪府泉佐野市）", genre:"タオル・寝具", price:10000, reviews:446, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff272132-izumisano%2F010b091%2F&link_type=text" },
+  { name:"今治タオル 雲ごこちフェイスタオル（愛媛県今治市）", genre:"タオル・寝具", price:6500, reviews:423, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff382027-imabari%2Fa-1079333%2F&link_type=text" },
+  { name:"今治タオル ホテルズ ミニバスタオル 選べる3・6・12枚（愛媛県今治市）", genre:"タオル・寝具", price:19500, reviews:204, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff382027-imabari%2Fi001910%2F&link_type=text" },
+  { name:"ファータッチ ニューマイヤー毛布 シングル（大阪府和泉市）", genre:"タオル・寝具", price:30000, reviews:147, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff272191-izumi%2Fam968-nt%2F&link_type=text" },
+  { name:"和ざらし2重ガーゼ 掛け布団カバー 選べる3サイズ（山梨県富士吉田市）", genre:"タオル・寝具", price:27000, reviews:110, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff192023-fujiyoshida%2Fraku572%2F&link_type=text" },
+  { name:"美濃焼 パスタ・サラダ皿8点セット 窯変ブルー（岐阜県土岐市）", genre:"キッチン用品", price:24000, reviews:211, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff212121-toki%2Fmbs002%2F&link_type=text" },
+  { name:"美濃焼 fiorire プレート×ボウル4点セット（岐阜県土岐市）", genre:"キッチン用品", price:23000, reviews:178, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff212121-toki%2Fmbx007%2F&link_type=text" },
+  { name:"貝印 関孫六 匠創 三徳包丁165mm（岐阜県関市）", genre:"キッチン用品", price:16000, reviews:167, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff212059-seki%2F10000247%2F&link_type=text" },
+  { name:"貝印 関孫六 ダイヤモンド＆セラミックシャープナー（岐阜県関市）", genre:"キッチン用品", price:9500, reviews:106, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff212059-seki%2F10000942%2F&link_type=text" },
+  { name:"サンクラフト パン切り包丁 シャープブレッドナイフ（岐阜県関市）", genre:"キッチン用品", price:10000, reviews:50, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff212059-seki%2F10000283%2F&link_type=text" },
+  { name:"レミパンミニ 20cm ホワイト 蓋付き（新潟県燕市）", genre:"キッチン用品", price:28000, reviews:39, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff152137-tsubame%2Ff20039%2F&link_type=text" },
+  { name:"貝印 関孫六 ピーラー スライス＆千切りセット（岐阜県関市）", genre:"キッチン用品", price:8000, reviews:25, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff212059-seki%2F10000949%2F&link_type=text" },
+  { name:"UNILLOY 薄く軽い鋳物フライパン 26cm（新潟県三条市）", genre:"キッチン用品", price:30000, reviews:19, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff152048-sanjo%2F030p011%2F&link_type=text" },
 ];
 
 // ---- 計算ロジック ----
