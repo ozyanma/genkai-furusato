@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>【開発中】限界ふるさと納税｜限度額ぴったりの返礼品組み合わせ提案</title>
+<title>限界ふるさと納税｜限度額ぴったりの返礼品組み合わせ提案</title>
 <meta name="description" content="年収と家族構成から、ふるさと納税の限度額の目安を計算し、限度額を使い切る返礼品の組み合わせを提案する無料ツールです。入力した情報はサーバーに送信されません。">
 <style>
   :root{ --main:#c0392b; --accent:#e67e22; --bg:#fdf8f3; --card:#fff; --text:#333; --muted:#777; --line:#e8ddd2; }
@@ -44,7 +44,6 @@
   <h1>限界ふるさと納税</h1>
   <p>限度額の目安を計算して、使い切る返礼品の組み合わせまで提案します</p>
 </header>
-<div style="background:#fff3cd;border:2px solid #e0a800;color:#664d03;padding:10px 14px;margin:12px auto;max-width:880px;border-radius:8px;font-weight:bold;text-align:center">このツールは現在開発中です。返礼品のデータはサンプルで、リンクは準備中です。</div>
 <div class="pr">※本ページには広告（アフィリエイトリンク）が含まれる場合があります</div>
 <main>
 
@@ -117,11 +116,11 @@
   <button class="sub" id="comboBtn">組み合わせを探す</button>
   <div class="result" id="comboResult">
     <table>
-      <thead><tr><th>返礼品（サンプル）</th><th>ジャンル</th><th class="price">寄附額</th><th></th></tr></thead>
+      <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th></th></tr></thead>
       <tbody id="comboBody"></tbody>
     </table>
     <p id="comboSum"></p>
-    <p class="note">※返礼品は現在サンプルデータです。実データへの差し替えと、各ポータルサイトへのリンク設定は公開準備の段階で行います。</p>
+    <p class="note">※寄附額は2026年11月20日時点の各返礼品の最低価格です。内容量が選べる返礼品は、最低価格の内容量で表示しています。最新の価格と内容は、リンク先の楽天市場の商品ページでご確認ください。</p>
   </div>
 </section>
 
@@ -133,40 +132,40 @@
 </section>
 
 </main>
-<footer>限界ふるさと納税（最小版）</footer>
+<footer>限界ふるさと納税</footer>
 <script>
 "use strict";
 /* =========================================================
-   設定：ASP提携が通ったら、ここにアフィリエイトリンクを設定します。
-   ITEMS の各 url が空文字の間は「リンク準備中」と表示されます。
+   返礼品データ：楽天アフィリエイトのリンクを設定済み（2026-11-20）。
+   url は https://hb.afl.rakuten.co.jp/ichiba/<アフィリエイトID>/?pc=<商品URL> の形式です。
    ========================================================= */
 
-// ---- 返礼品サンプルデータ（実データに差し替える前提の仮データ） ----
+// ---- 返礼品データ（楽天ふるさと納税の実在品・2026-11-20確認） ----
 const ITEMS = [
-  { name:"国産米 10kg（サンプル）", genre:"米", price:12000, url:"" },
-  { name:"国産米 5kg（サンプル）", genre:"米", price:8000, url:"" },
-  { name:"新米 食べ比べセット 6kg（サンプル）", genre:"米", price:10000, url:"" },
-  { name:"黒毛和牛 切り落とし 1kg（サンプル）", genre:"肉", price:15000, url:"" },
-  { name:"豚肉 しゃぶしゃぶ用 1.2kg（サンプル）", genre:"肉", price:10000, url:"" },
-  { name:"ハンバーグ 10個セット（サンプル）", genre:"肉", price:11000, url:"" },
-  { name:"鶏もも肉 2kg（サンプル）", genre:"肉", price:7000, url:"" },
-  { name:"ソーセージ・ベーコン詰め合わせ（サンプル）", genre:"肉", price:6000, url:"" },
-  { name:"ホタテ貝柱 500g（サンプル）", genre:"魚介", price:13000, url:"" },
-  { name:"いくら醤油漬け 250g（サンプル）", genre:"魚介", price:12000, url:"" },
-  { name:"銀鮭 切り身 10切れ（サンプル）", genre:"魚介", price:9000, url:"" },
-  { name:"干物セット 5種（サンプル）", genre:"魚介", price:8000, url:"" },
-  { name:"季節の果物 詰め合わせ（サンプル）", genre:"果物", price:10000, url:"" },
-  { name:"みかん 5kg（サンプル）", genre:"果物", price:7000, url:"" },
-  { name:"シャインマスカット 2房（サンプル）", genre:"果物", price:14000, url:"" },
-  { name:"りんご 5kg（サンプル）", genre:"果物", price:8000, url:"" },
-  { name:"バウムクーヘン・焼き菓子セット（サンプル）", genre:"スイーツ", price:5000, url:"" },
-  { name:"アイスクリーム 12個セット（サンプル）", genre:"スイーツ", price:6000, url:"" },
-  { name:"チーズケーキ ホール（サンプル）", genre:"スイーツ", price:5000, url:"" },
-  { name:"地元産 お茶 飲み比べセット（サンプル）", genre:"飲料", price:5000, url:"" },
-  { name:"クラフトビール 6本セット（サンプル）", genre:"飲料", price:9000, url:"" },
-  { name:"天然水 2L×12本（サンプル）", genre:"飲料", price:6000, url:"" },
-  { name:"コーヒー豆 500g（サンプル）", genre:"飲料", price:5000, url:"" },
-  { name:"ジュース 1L×6本（サンプル）", genre:"飲料", price:7000, url:"" }
+  { name:"阿蘇びより 5kg（熊本県南阿蘇村）", genre:"米", price:6000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff434337-minamiaso%2F10000737%2F&link_type=text" },
+  { name:"プレミアムななつぼし白米 5kg（北海道妹背牛町）", genre:"米", price:13500, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff014338-moseushi%2Fc010-11%2F&link_type=text" },
+  { name:"ひとめぼれ 10kg（山形県遊佐町）", genre:"米", price:14000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff064611-yuza%2F2001-00001-00%2F&link_type=text" },
+  { name:"特別栽培米つや姫 15kg（山形県酒田市）", genre:"米", price:23000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff062049-sakata%2F8900-30002079%2F&link_type=text" },
+  { name:"国産若鶏セット もも・むね 2.1kg（宮崎県都城市）", genre:"肉", price:8000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff452025-miyakonojo%2Fmj-3313%2F&link_type=text" },
+  { name:"宮崎県産豚肉バラエティセット 2.1kg（宮崎県宮崎市）", genre:"肉", price:13000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff452017-miyazaki%2Fm132-064%2F&link_type=text" },
+  { name:"鉄板焼ハンバーグ デミソース 10個（福岡県飯塚市）", genre:"肉", price:14000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff402052-iizuka%2F10000315%2F&link_type=text" },
+  { name:"鹿児島県産黒毛和牛 赤身スライス・焼肉 1kg（鹿児島県志布志市）", genre:"肉", price:15000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff462217-shibushi%2Fb5-080%2F&link_type=text" },
+  { name:"熟成秋鮭切身 6切（小分け）（北海道別海町）", genre:"魚介", price:8000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff016918-betsukai%2Fbe018-0095%2F&link_type=text" },
+  { name:"訳ありホタテ貝柱 500g（生食用）（北海道森町）", genre:"魚介", price:10000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff013455-mori%2Ff4c-0881&link_type=text" },
+  { name:"いくら醤油漬け（鮭卵）200g（北海道白糠町）", genre:"魚介", price:16000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff016683-shiranuka%2F8700-30009172%2F&link_type=text" },
+  { name:"九州産うなぎ蒲焼 特上4尾 計840g以上（宮崎県宮崎市）", genre:"魚介", price:24000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff452017-miyazaki%2Fm040-001%2F&link_type=text" },
+  { name:"あまおう 約500g（福岡県川崎町）", genre:"果物", price:5500, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff406058-kawasaki%2Fone001-oya%2F&link_type=text" },
+  { name:"訳ありシナノゴールドりんご 2kg（長野県飯綱町）", genre:"果物", price:8000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff205907-iizuna%2F1208%2F&link_type=text" },
+  { name:"ちっちゃい有田みかん 小玉5kg（和歌山県広川町）", genre:"果物", price:14000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff303623-hirogawa%2Fitem0190%2F&link_type=text" },
+  { name:"川中島白桃 秀品3kg（長野県飯綱町）", genre:"果物", price:17500, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff205907-iizuna%2F0054%2F&link_type=text" },
+  { name:"シャトレーゼ ワッフル＆スコーン詰合せ9個（山梨県甲府市）", genre:"スイーツ", price:5000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff192015-kofu%2Fk066-027%2F&link_type=text" },
+  { name:"バスクチーズケーキ 4号 約350g（高知県宿毛市）", genre:"スイーツ", price:6000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff392081-sukumo%2F119001%2F&link_type=text" },
+  { name:"浜んまちPUDDING カスタードプリン 80g×6個（長崎県時津町）", genre:"スイーツ", price:8000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff423084-togitsu%2F10000203%2F&link_type=text" },
+  { name:"ドリームドルチェ アイス・ジェラート 100ml×14個（北海道上士幌町）", genre:"スイーツ", price:16000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff016331-kamishihoro%2F10000095%2F&link_type=text" },
+  { name:"お～いお茶 緑茶 1ケース（兵庫県神戸市）", genre:"飲料", price:6000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff281000-kobe%2Ff0409-2%2F&link_type=text" },
+  { name:"訳ありブレンドコーヒー豆・粉 600g（岡山県高梁市）", genre:"飲料", price:7000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff332097-takahashi%2F56150207%2F&link_type=text" },
+  { name:"飲むみかん 有田みかんジュース 180ml×12本（和歌山県有田市）", genre:"飲料", price:10000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff302040-arida%2F13%2F&link_type=text" },
+  { name:"温泉水99 11.5L×2箱（鹿児島県垂水市）", genre:"飲料", price:16000, url:"https://hb.afl.rakuten.co.jp/ichiba/33856235.76051f6d.33856236.b2ed63e9/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ff462144-tarumizu%2Fa1-0827%2F&link_type=text" },
 ];
 
 // ---- 計算ロジック ----
