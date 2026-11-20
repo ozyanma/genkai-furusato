@@ -22,6 +22,8 @@
   .row{ display:flex; gap:12px; } .row > div{ flex:1; }
   button{ display:block; width:100%; margin-top:18px; padding:13px; font-size:1.05rem; font-weight:700; color:#fff; background:var(--main); border:none; border-radius:9px; cursor:pointer; }
   button.sub{ background:var(--accent); }
+  button.mini{ display:inline-block; width:auto; margin-top:0; padding:6px 14px; font-size:.88rem; background:#fff; color:var(--main); border:1.5px solid var(--main); }
+  .genre-actions{ margin:12px 0 0; }
   button:disabled{ background:#bbb; cursor:not-allowed; }
   .result{ display:none; }
   .combo-placeholder{ border:2px dashed var(--line); border-radius:10px; min-height:200px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--muted); margin-top:16px; padding:16px; font-size:.92rem; }
@@ -98,6 +100,28 @@
     <p class="note">所得割額は、毎年5〜6月に届く住民税決定通知書の「所得割額」の欄（市町村民税＋都道府県民税の合計）です。入力すると、年収からの概算よりこちらを優先します。</p>
   </details>
 
+  <details>
+    <summary>iDeCo・保険料控除がある方はこちら（年収からの概算に反映）</summary>
+    <div class="row">
+      <div>
+        <label>iDeCoの掛金（年額・円）</label>
+        <input type="number" id="ideco" inputmode="numeric" placeholder="例：276000" min="0">
+      </div>
+      <div>
+        <label>生命保険料控除額（円）</label>
+        <input type="number" id="lifeIns" inputmode="numeric" placeholder="例：100000" min="0">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>地震保険料控除額（円）</label>
+        <input type="number" id="quakeIns" inputmode="numeric" placeholder="例：30000" min="0">
+      </div>
+      <div></div>
+    </div>
+    <p class="note">iDeCoの掛金は全額が所得控除になります。生命保険料控除は住民税で最大7万円・所得税で最大12万円、地震保険料控除は住民税で最大2万5千円・所得税で最大5万円として計算します。控除額は源泉徴収票で確認できます。住民税の所得割額を入力した場合はそちらが優先され、控除はすでに所得割額に含まれているため、こちらは反映されません。</p>
+  </details>
+
   <button id="calcBtn">限度額を計算する</button>
   <p class="combo-notice" id="calcNotice" style="display:none"></p>
 
@@ -112,6 +136,7 @@
 <section class="combo">
   <h2>2. 返礼品の組み合わせ提案</h2>
   <p style="margin-top:0">好きなジャンルを選ぶと、あと使える金額に収まる組み合わせを自動で探します。同じ金額の返礼品がある場合は、結果の各行で好みの品に入れ替えることもできます。</p>
+  <p class="genre-actions"><button type="button" class="mini" id="genreAllOn">すべてON</button> <button type="button" class="mini" id="genreAllOff">すべてOFF</button></p>
   <div class="chips" id="genres">
     <label><input type="checkbox" value="米" checked> 米</label>
     <label><input type="checkbox" value="肉" checked> 肉</label>
@@ -346,16 +371,23 @@ function limitFromShotokuwari(shotokuwari, rate){
   const v = shotokuwari * 0.20 / (0.90 - rate * 1.021) + 2000;
   return Math.max(0, Math.floor(v / 1000) * 1000);
 }
-function estimateLimit(incomeMan, spouse, dep1618, dep1922){
+function estimateLimit(incomeMan, spouse, dep1618, dep1922, ideco, lifeIns, quakeIns){
   const income = incomeMan * 10000;
   const salaryIncome = income - salaryDeduction(income);
   const social = Math.round(income * 0.15); // 社会保険料は年収の15%で概算
+  const idecoAmt = ideco || 0; // iDeCo掛金は全額控除
+  const resLife = Math.min(lifeIns || 0, 70000);   // 生命保険料控除（住民税の上限）
+  const incLife = Math.min(lifeIns || 0, 120000);  // 生命保険料控除（所得税の上限）
+  const resQuake = Math.min(quakeIns || 0, 25000); // 地震保険料控除（住民税の上限）
+  const incQuake = Math.min(quakeIns || 0, 50000); // 地震保険料控除（所得税の上限）
   let resTaxable = salaryIncome - social - 430000
-    - (spouse ? 330000 : 0) - dep1618*330000 - dep1922*450000;
+    - (spouse ? 330000 : 0) - dep1618*330000 - dep1922*450000
+    - idecoAmt - resLife - resQuake;
   if(resTaxable < 0) resTaxable = 0;
   const shotokuwari = Math.floor(resTaxable * 0.10);
   let incTaxable = salaryIncome - social - 480000
-    - (spouse ? 380000 : 0) - dep1618*380000 - dep1922*630000;
+    - (spouse ? 380000 : 0) - dep1618*380000 - dep1922*630000
+    - idecoAmt - incLife - incQuake;
   if(incTaxable < 0) incTaxable = 0;
   return limitFromShotokuwari(shotokuwari, incomeTaxRate(incTaxable));
 }
@@ -374,7 +406,10 @@ document.getElementById("calcBtn").addEventListener("click", function(){
     const spouse = document.getElementById("spouse").value === "1";
     const d1 = parseInt(document.getElementById("dep1618").value, 10) || 0;
     const d2 = parseInt(document.getElementById("dep1922").value, 10) || 0;
-    limit = estimateLimit(incomeMan, spouse, d1, d2);
+    const ideco = parseInt(document.getElementById("ideco").value, 10) || 0;
+    const lifeIns = parseInt(document.getElementById("lifeIns").value, 10) || 0;
+    const quakeIns = parseInt(document.getElementById("quakeIns").value, 10) || 0;
+    limit = estimateLimit(incomeMan, spouse, d1, d2, ideco, lifeIns, quakeIns);
   }
   const already = parseInt(document.getElementById("already").value, 10) || 0;
   const safe = Math.floor(limit * 0.9 / 1000) * 1000;
@@ -407,7 +442,7 @@ function invalidateCalc(){
   hideComboNotice();
   showCalcNotice("入力が変更されました。「限度額を計算する」を押して、もう一度計算してください。");
 }
-["income","spouse","dep1618","dep1922","already","shotokuwari","rate"].forEach(function(id){
+["income","spouse","dep1618","dep1922","already","shotokuwari","rate","ideco","lifeIns","quakeIns"].forEach(function(id){
   const el = document.getElementById(id);
   el.addEventListener("input", invalidateCalc);
   el.addEventListener("change", invalidateCalc);
@@ -516,6 +551,12 @@ function showComboNotice(msg){
 function hideComboNotice(){
   document.getElementById("comboNotice").style.display = "none";
 }
+
+function setAllGenres(on){
+  Array.prototype.forEach.call(document.querySelectorAll("#genres input"), function(el){ el.checked = on; });
+}
+document.getElementById("genreAllOn").addEventListener("click", function(){ setAllGenres(true); });
+document.getElementById("genreAllOff").addEventListener("click", function(){ setAllGenres(false); });
 
 document.getElementById("comboBtn").addEventListener("click", function(){
   if(currentRemaining === null){ showComboNotice("先に「1. 限度額の目安を計算する」で限度額を計算してください。その金額を予算にして組み合わせを探します。"); return; }
