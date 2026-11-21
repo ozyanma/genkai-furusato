@@ -28,7 +28,13 @@
   .budget-mode label{ margin-right:14px; white-space:nowrap; }
   .budget-mode .now{ color:#555; font-size:.9rem; }
   .optnote{ font-size:.82rem; color:#777; margin-top:2px; }
-  .thumb{ width:56px; height:56px; object-fit:cover; border-radius:6px; margin-right:8px; vertical-align:middle; background:#f2f2f2; }
+  .thumb{ width:56px; height:56px; object-fit:cover; border-radius:6px; margin-right:8px; vertical-align:middle; background:#f2f2f2; cursor:pointer; }
+  #lightbox{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.82); z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+  #lightbox.open{ display:flex; }
+  #lightbox figure{ margin:0; text-align:center; max-width:92vw; }
+  #lightbox img{ max-width:92vw; max-height:82vh; border-radius:8px; background:#fff; }
+  #lightbox figcaption{ color:#fff; margin-top:10px; font-size:.95rem; }
+  #lightbox .lb-hint{ color:#ccc; font-size:.8rem; margin-top:4px; }
   .vartag{ display:inline-block; margin-left:6px; padding:1px 7px; font-size:.72rem; font-weight:700; color:#b3541e; background:#fdf0e2; border:1px solid #e0a266; border-radius:999px; vertical-align:middle; white-space:nowrap; }
   button:disabled{ background:#bbb; cursor:not-allowed; }
   .result{ display:none; }
@@ -551,7 +557,28 @@ function preferHigherRated(combo, pool){
 
 function dispName(it){ return it.name + (it.opt ? "（" + it.opt + "を選択した場合）" : (it.v ? "（選択で金額が変わります）" : "")); }
 function optNoteHtml(it){ return it.opt ? '<div class="optnote">（' + it.opt + 'を選択した場合）</div>' : ""; }
-function imgHtml(it){ return it.img ? '<img class="thumb" src="' + it.img + '" alt="" loading="lazy" onerror="this.remove()">' : ""; }
+function imgHtml(it){ return it.img ? '<img class="thumb" src="' + it.img + '" alt="" title="クリックで拡大" data-name="' + it.name + '" loading="lazy" onerror="this.remove()">' : ""; }
+function largeUrl(src){
+  let u = src.split("?")[0];
+  u = u.replace("https://tshop.r10s.jp/", "https://shop.r10s.jp/");
+  u = u.replace("https://thumbnail.image.rakuten.co.jp/@0_mall/", "https://image.rakuten.co.jp/");
+  return u;
+}
+function openLightbox(thumb){
+  const im = document.getElementById("lightboxImg");
+  im.onerror = function(){ if (im.src !== thumb.src) im.src = thumb.src; };
+  im.src = largeUrl(thumb.src);
+  im.alt = thumb.dataset.name || "";
+  document.getElementById("lightboxCap").textContent = thumb.dataset.name || "";
+  document.getElementById("lightbox").classList.add("open");
+}
+function closeLightbox(){ document.getElementById("lightbox").classList.remove("open"); }
+document.addEventListener("click", function(e){
+  if (e.target.classList && e.target.classList.contains("thumb")) openLightbox(e.target);
+  else if (e.target.closest && e.target.closest("#lightbox")) closeLightbox();
+});
+document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeLightbox(); });
+
 function dispNameHtml(it){ return it.name + (it.v ? ' <span class="vartag">選択で金額が変わります</span>' : ""); }
 
 function renderCombo(){
@@ -695,5 +722,6 @@ function renderCatalog(){
 document.getElementById("allGenreFilter").addEventListener("change", renderCatalog);
 renderCatalog();
 </script>
+<div id="lightbox" role="dialog" aria-modal="true"><figure><img id="lightboxImg" alt=""><figcaption id="lightboxCap"></figcaption><div class="lb-hint">クリックで閉じる</div></figure></div>
 </body>
 </html>
