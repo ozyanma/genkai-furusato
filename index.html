@@ -49,6 +49,9 @@
   .modal-card{ background:#fff; border-radius:12px; padding:18px; width:660px; max-width:94vw; }
   .modal-card h3{ margin:0 0 8px; font-size:1.05rem; }
   .modal-close{ display:block; width:auto; margin:0 0 10px auto; padding:6px 14px; font-size:.9rem; background:#fff; color:var(--main); border:1.5px solid var(--main); }
+  .pagetabs{ margin:10px 0; display:flex; flex-wrap:wrap; gap:6px; }
+  .pagetabs button{ display:inline-block; width:auto; margin:0; padding:6px 13px; font-size:.9rem; font-weight:700; background:#fff; color:var(--main); border:1.5px solid var(--main); border-radius:999px; cursor:pointer; }
+  .pagetabs button.active{ background:var(--main); color:#fff; }
   .ctl{ margin:10px 0; }
   .ctl label{ margin-top:0; }
   .vartag{ display:inline-block; margin-left:6px; padding:1px 7px; font-size:.72rem; font-weight:700; color:#b3541e; background:#fdf0e2; border:1px solid #e0a266; border-radius:999px; vertical-align:middle; white-space:nowrap; }
@@ -230,10 +233,12 @@
       <option value="priceDesc">寄附額が高い順</option>
     </select></label>
     <label style="display:inline-block; margin:8px 0 0 4px; font-weight:400;"><input type="checkbox" id="favOnly" style="width:auto;"> お気に入りのみ表示（★<span id="favCount">0</span>件）</label></p>
+  <div class="pagetabs" id="catalogTabsTop"></div>
   <table>
     <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">評価（レビュー件数）</th><th></th></tr></thead>
     <tbody id="allBody"></tbody>
   </table>
+  <div class="pagetabs" id="catalogTabsBottom"></div>
   <p class="note">※評価（★）・レビュー件数・寄附額は2026年11月20日時点の各商品ページの表記です。寄附額は、内容量が選べる返礼品では最低価格を表示しています。「選択で金額が変わります」と表示された品目は、選択によって寄附額が変わる場合があります。評価が確認できなかった品目は「★—」、レビュー件数が確認できなかった品目は「—」で表示しています。</p>
 </section>
 
@@ -807,8 +812,13 @@ function renderCatalog(){
     if(sortKey === "priceDesc") return (b.price - a.price) || ((b.reviews || 0) - (a.reviews || 0));
     return (b.reviews || 0) - (a.reviews || 0);
   });
+  const PAGE_SIZE = 20;
+  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  if(catalogPage > totalPages) catalogPage = totalPages;
+  if(catalogPage < 1) catalogPage = 1;
+  const pageItems = list.slice((catalogPage - 1) * PAGE_SIZE, catalogPage * PAGE_SIZE);
   let shown = 0;
-  list.forEach(function(it){
+  pageItems.forEach(function(it){
     shown++;
     const tr = document.createElement("tr");
     const rev = it.reviews ? it.reviews.toLocaleString() + "件" : "—";
@@ -823,13 +833,34 @@ function renderCatalog(){
   if(f) parts.push(f);
   if(q) parts.push("「" + q + "」");
   if(favOnly) parts.push("お気に入り");
-  document.getElementById("allCount").textContent = parts.length ? parts.join("・") + "：" + shown + "品を表示中" : "";
+  const rangeText = list.length ? "（" + ((catalogPage - 1) * PAGE_SIZE + 1) + "〜" + ((catalogPage - 1) * PAGE_SIZE + shown) + "品目）" : "";
+  document.getElementById("allCount").textContent = (parts.length ? parts.join("・") + "：" : "全") + list.length + "品中" + rangeText + "を表示中";
   const fc = document.getElementById("favCount"); if(fc) fc.textContent = favs.length;
+  renderCatalogTabs(totalPages);
 }
-document.getElementById("allGenreFilter").addEventListener("change", renderCatalog);
-document.getElementById("allSearch").addEventListener("input", renderCatalog);
-document.getElementById("allSort").addEventListener("change", renderCatalog);
-document.getElementById("favOnly").addEventListener("change", renderCatalog);
+let catalogPage = 1;
+function renderCatalogTabs(totalPages){
+  const html = [];
+  for(let p = 1; p <= totalPages; p++){
+    html.push('<button type="button" class="pagetab' + (p === catalogPage ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>');
+  }
+  document.getElementById("catalogTabsTop").innerHTML = html.join("");
+  document.getElementById("catalogTabsBottom").innerHTML = html.join("");
+}
+document.addEventListener("click", function(e){
+  if(e.target.classList && e.target.classList.contains("pagetab")){
+    catalogPage = parseInt(e.target.dataset.page, 10) || 1;
+    renderCatalog();
+    if(e.target.closest && e.target.closest("#catalogTabsBottom")){
+      document.getElementById("catalogTabsTop").scrollIntoView({ block: "start" });
+    }
+  }
+});
+function resetCatalogPage(){ catalogPage = 1; renderCatalog(); }
+document.getElementById("allGenreFilter").addEventListener("change", resetCatalogPage);
+document.getElementById("allSearch").addEventListener("input", resetCatalogPage);
+document.getElementById("allSort").addEventListener("change", resetCatalogPage);
+document.getElementById("favOnly").addEventListener("change", resetCatalogPage);
 renderCatalog();
 </script>
 <div id="lightbox" role="dialog" aria-modal="true"><figure><img id="lightboxImg" alt=""><figcaption id="lightboxCap"></figcaption><div class="lb-hint">クリックで閉じる</div></figure></div>
