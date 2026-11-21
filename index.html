@@ -44,8 +44,11 @@
   #lightbox .lb-hint{ color:#ccc; font-size:.8rem; margin-top:4px; }
   .favbtn{ display:inline-block; width:auto; margin:0 2px 0 0; padding:2px 5px; font-size:1.05rem; line-height:1; color:#bbb; background:none; border:none; cursor:pointer; vertical-align:middle; }
   .favbtn.on{ color:var(--accent); }
-  .deadline-box{ background:#fdf3d7; border:1px solid #e3c766; border-radius:8px; padding:10px 14px; margin-bottom:10px; }
-  .deadline-box strong{ color:var(--main); font-size:1.05rem; }
+  #limitModal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:1000; align-items:flex-start; justify-content:center; overflow:auto; padding:24px 10px; }
+  #limitModal.open{ display:flex; }
+  .modal-card{ background:#fff; border-radius:12px; padding:18px; width:660px; max-width:94vw; }
+  .modal-card h3{ margin:0 0 8px; font-size:1.05rem; }
+  .modal-close{ display:block; width:auto; margin:0 0 10px auto; padding:6px 14px; font-size:.9rem; background:#fff; color:var(--main); border:1.5px solid var(--main); }
   .ctl{ margin:10px 0; }
   .ctl label{ margin-top:0; }
   .vartag{ display:inline-block; margin-left:6px; padding:1px 7px; font-size:.72rem; font-weight:700; color:#b3541e; background:#fdf0e2; border:1px solid #e0a266; border-radius:999px; vertical-align:middle; white-space:nowrap; }
@@ -149,6 +152,7 @@
 
   <button id="calcBtn">限度額を計算する</button>
   <p class="combo-notice" id="calcNotice" style="display:none"></p>
+  <p style="text-align:center; margin:12px 0 0;"><a href="#" id="limitTableLink">年収・家族構成別の早見表を見る</a></p>
 
   <div class="result" id="result">
     <p>自己負担2,000円で済む寄附額の目安<br><span class="big" id="limitOut">-</span></p>
@@ -159,27 +163,8 @@
   </div>
 </section>
 
-<section>
-  <h2>2. 限度額の早見表（年収・家族構成別）</h2>
-  <p style="margin-top:0">年収と家族構成ごとの、限度額の目安の一覧です。上の計算ツールと同じ概算式で算出しています。</p>
-  <table>
-    <thead><tr><th>年収</th><th class="price">独身</th><th class="price">夫婦</th><th class="price">夫婦＋子（16〜18歳）1人</th><th class="price">夫婦＋子（19〜22歳）1人</th></tr></thead>
-    <tbody id="limitTableBody"></tbody>
-  </table>
-  <p class="note">※社会保険料は年収の15%で概算し、iDeCo・保険料控除などは含んでいません。おおよその目安としてご覧ください。ご自身の条件では上の計算ツールでご確認ください。</p>
-</section>
-
-<section>
-  <h2>寄附の締切と手続き</h2>
-  <div class="deadline-box"><strong id="daysLeft"></strong></div>
-  <p style="margin-bottom:0">・その年の寄附として扱われるのは、<strong>1月1日〜12月31日</strong>に寄附した分です。年末は申し込みが集中するので、余裕を持った手続きをおすすめします。<br>
-  ・<strong>ワンストップ特例制度</strong>は、確定申告をしない方が使える仕組みです。寄附先は<strong>5自治体まで</strong>で、申請書の提出期限は<strong>翌年1月10日必着</strong>です。<br>
-  ・確定申告をする場合は、寄附金受領証明書を添えて申告すれば控除を受けられます。<br>
-  ・詳しくは下の「使い方と注意点」もご覧ください。</p>
-</section>
-
 <section class="combo">
-  <h2>3. 返礼品の組み合わせ提案</h2>
+  <h2>2. 返礼品の組み合わせ提案</h2>
   <p style="margin-top:0">好きなジャンルを選ぶと、あと使える金額に収まる組み合わせを自動で探します。同じ金額の返礼品がある場合は、結果の各行で好みの品に入れ替えることもできます。</p>
   <p class="budget-mode">組み合わせの予算：
     <label><input type="radio" name="budgetMode" value="max"> 目安（上限）で探す</label>
@@ -205,6 +190,7 @@
   <div class="combo-placeholder" id="comboPlaceholder">▼<br>「組み合わせを探す」を押すと、ここに結果が表示されます</div>
   <div class="result" id="comboResult">
     <p class="combo-label">▼ 組み合わせ結果</p>
+    <p class="note" id="comboCityNote" style="margin:0 0 6px;"></p>
     <table>
       <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">評価（レビュー件数）</th><th></th></tr></thead>
       <tbody id="comboBody"></tbody>
@@ -217,7 +203,7 @@
 </section>
 
 <section>
-  <h2>4. 返礼品一覧</h2>
+  <h2>3. 返礼品一覧</h2>
   <p style="margin-top:0">掲載中の全139品の一覧です。並び替えや検索、ジャンルでの絞り込みができます。☆を押すとお気に入りに保存できます。上の組み合わせ提案の対象も、この一覧の品目です。</p>
   <p><label>ジャンルで絞り込む
     <select id="allGenreFilter">
@@ -260,6 +246,7 @@
 
 </main>
 <footer>限界ふるさと納税</footer>
+<div id="limitModal" role="dialog" aria-modal="true"><div class="modal-card"><button type="button" class="modal-close" id="limitModalClose">× 閉じる</button><h3>限度額の早見表（年収・家族構成別）</h3><p style="margin-top:0">年収と家族構成ごとの、限度額の目安の一覧です。計算ツールと同じ概算式で算出しています。</p><table><thead><tr><th>年収</th><th class="price">独身</th><th class="price">夫婦</th><th class="price">夫婦＋子（16〜18歳）1人</th><th class="price">夫婦＋子（19〜22歳）1人</th></tr></thead><tbody id="limitTableBody"></tbody></table><p class="note">※社会保険料は年収の15%で概算し、iDeCo・保険料控除などは含んでいません。おおよその目安としてご覧ください。ご自身の条件では計算ツールでご確認ください。</p></div></div>
 <script>
 "use strict";
 /* =========================================================
@@ -668,6 +655,17 @@ function renderCombo(){
     "円（残り " + (currentRemaining - sum).toLocaleString() + "円）";
   document.getElementById("comboVarNote").style.display =
     currentCombo.some(function(it){ return it.v; }) ? "block" : "none";
+  const cities = {};
+  currentCombo.forEach(function(it){
+    const m = /（([^（）]+)）$/.exec(it.name);
+    if(m) cities[m[1]] = 1;
+  });
+  const nCity = Object.keys(cities).length;
+  const cn = document.getElementById("comboCityNote");
+  cn.textContent = "※ワンストップ特例制度を使う場合、寄附先は5自治体までです。この組み合わせの寄附先は" + nCity + "自治体です。" +
+    (nCity > 5 ? "6自治体以上になるため、ワンストップ特例は使えず確定申告が必要になります。" : "");
+  cn.style.color = nCity > 5 ? "#c0392b" : "";
+  cn.style.fontWeight = nCity > 5 ? "700" : "";
 }
 
 function showComboNotice(msg){
@@ -756,16 +754,13 @@ copyBtn.addEventListener("click", function(){
   });
 })();
 
-// ---- 締切までの残り日数 ----
-(function(){
-  const el = document.getElementById("daysLeft");
-  if(!el) return;
-  const now = new Date();
-  let year = now.getFullYear();
-  if(now > new Date(year, 11, 31, 23, 59, 59)) year++;
-  const days = Math.round((new Date(year, 11, 31) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
-  el.textContent = days <= 0 ? "本日12月31日が、今年の寄附の締切です。" : "今年の寄附の締切（12月31日）まで、あと" + days + "日です。";
-})();
+// ---- 早見表ポップアップ ----
+function openLimitModal(){ document.getElementById("limitModal").classList.add("open"); }
+function closeLimitModal(){ document.getElementById("limitModal").classList.remove("open"); }
+document.getElementById("limitTableLink").addEventListener("click", function(e){ e.preventDefault(); openLimitModal(); });
+document.getElementById("limitModalClose").addEventListener("click", closeLimitModal);
+document.getElementById("limitModal").addEventListener("click", function(e){ if(e.target === this) closeLimitModal(); });
+document.addEventListener("keydown", function(e){ if(e.key === "Escape") closeLimitModal(); });
 
 // ---- お気に入り ----
 let favs = [];
