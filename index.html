@@ -35,7 +35,12 @@
   .budget-mode label{ margin-right:14px; white-space:nowrap; }
   .budget-mode .now{ color:#555; font-size:.9rem; }
   .optnote{ font-size:.82rem; color:#666; margin-top:2px; }
-  .thumb{ width:56px; height:56px; object-fit:cover; border-radius:6px; margin-right:8px; vertical-align:middle; background:#f2f2f2; cursor:pointer; }
+  .thumb{ width:64px; height:64px; object-fit:cover; border-radius:6px; background:#f2f2f2; cursor:pointer; display:block; }
+  .itemcell{ display:flex; gap:10px; align-items:flex-start; }
+  .item-img{ flex:0 0 auto; }
+  .item-main{ flex:1 1 auto; min-width:0; }
+  .item-link{ color:var(--main); font-weight:700; text-decoration:none; }
+  .item-link:hover{ text-decoration:underline; }
   #lightbox{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.82); z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
   #lightbox.open{ display:flex; }
   #lightbox figure{ margin:0; text-align:center; max-width:92vw; }
@@ -45,7 +50,7 @@
   @media (max-width:640px){
     header h1{ font-size:1.3rem; }
     section{ padding:14px 12px; }
-    .thumb{ width:48px; height:48px; }
+    .thumb{ width:52px; height:52px; }
     .catalog-table thead{ display:none; }
     .catalog-table tr{ display:block; padding:8px 2px; }
     .catalog-table td{ display:inline; border-bottom:none; padding:1px 6px 1px 0; }
@@ -217,7 +222,7 @@
     <p class="combo-label">▼ 組み合わせ結果</p>
     <p class="note" id="comboCityNote" style="margin:0 0 6px;"></p>
     <table>
-      <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">評価（レビュー件数）</th><th></th></tr></thead>
+      <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">評価（レビュー件数）</th></tr></thead>
       <tbody id="comboBody"></tbody>
     </table>
     <p id="comboSum"></p>
@@ -258,7 +263,7 @@
     <label style="display:inline-block; margin:8px 0 0 4px; font-weight:400;"><input type="checkbox" id="favOnly" style="width:auto;"> お気に入りのみ表示（★<span id="favCount">0</span>件）</label></p>
   <div class="pagetabs" id="catalogTabsTop"></div>
   <table class="catalog-table">
-    <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">評価（レビュー件数）</th><th></th></tr></thead>
+    <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">評価（レビュー件数）</th></tr></thead>
     <tbody id="allBody"></tbody>
   </table>
   <div class="pagetabs" id="catalogTabsBottom"></div>
@@ -636,6 +641,14 @@ document.addEventListener("click", function(e){
 });
 document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeLightbox(); });
 
+function itemCellHtml(it, extra){
+  const title = it.url
+    ? '<a class="item-link" href="' + it.url + '" target="_blank" rel="nofollow sponsored noopener">' + it.name + '</a>'
+    : it.name;
+  return '<div class="itemcell"><div class="item-img">' + imgHtml(it) + '</div>' +
+    '<div class="item-main">' + favBtnHtml(it) + title + (it.v ? ' <span class="vartag">選択で金額が変わります</span>' : '') + (extra || '') + '</div></div>';
+}
+
 function dispNameHtml(it){ return it.name + (it.v ? ' <span class="vartag">選択で金額が変わります</span>' : ""); }
 
 function renderCombo(){
@@ -645,9 +658,6 @@ function renderCombo(){
   currentCombo.forEach(function(it, idx){
     sum += it.price;
     const tr = document.createElement("tr");
-    const link = it.url
-      ? '<a class="btn" href="' + it.url + '" target="_blank" rel="nofollow sponsored noopener">見に行く</a>'
-      : '<span class="btn-off">リンク準備中</span>';
     const comboBases = currentCombo.map(function(e){ return e.base; });
     const alts = currentPool.filter(function(p){
       return p.price === it.price && comboBases.indexOf(p.base) < 0;
@@ -666,8 +676,8 @@ function renderCombo(){
     const rev = it.reviews ? it.reviews.toLocaleString() + "件" : "—";
     const star = it.rating ? "★" + it.rating.toFixed(2) : "★—";
     const evalCell = (it.rating || it.reviews) ? star + "（" + rev + "）" : "—";
-    tr.innerHTML = "<td>" + favBtnHtml(it) + imgHtml(it) + dispNameHtml(it) + optNoteHtml(it) + swap + "</td><td>" + it.genre + "</td><td class='price'>" +
-      it.price.toLocaleString() + "円</td><td class='price'>" + evalCell + "</td><td>" + link + "</td>";
+    tr.innerHTML = "<td>" + itemCellHtml(it, optNoteHtml(it) + swap) + "</td><td>" + it.genre + "</td><td class='price'>" +
+      it.price.toLocaleString() + "円</td><td class='price'>" + evalCell + "</td>";
     body.appendChild(tr);
   });
   Array.prototype.forEach.call(body.querySelectorAll("select.swap"), function(sel){
@@ -850,9 +860,8 @@ function renderCatalog(){
     const rev = it.reviews ? it.reviews.toLocaleString() + "件" : "—";
     const star = it.rating ? "★" + it.rating.toFixed(2) : "★—";
     const evalCell = (it.rating || it.reviews) ? star + "（" + rev + "）" : "—";
-    tr.innerHTML = "<td>" + favBtnHtml(it) + imgHtml(it) + dispNameHtml(it) + "</td><td>" + it.genre + "</td><td class='price'>" +
-      it.price.toLocaleString() + "円" + (it.v ? "〜" : "") + "</td><td class='price'>" + evalCell + "</td><td>" +
-      '<a class="btn" href="' + it.url + '" target="_blank" rel="nofollow sponsored noopener">見に行く</a></td>';
+    tr.innerHTML = "<td>" + itemCellHtml(it) + "</td><td>" + it.genre + "</td><td class='price'>" +
+      it.price.toLocaleString() + "円" + (it.v ? "〜" : "") + "</td><td class='price'>" + evalCell + "</td>";
     body.appendChild(tr);
   });
   const parts = [];
