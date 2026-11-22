@@ -727,9 +727,9 @@ function renderCombo(){
   const tabs = document.getElementById("comboTabs");
   if(comboPatterns.length > 1){
     tabs.style.display = "flex";
-    tabs.innerHTML = '<span class="note" style="align-self:center">同じ合計金額になる組み合わせが' + comboPatterns.length + 'パターンあります：</span>' +
+    tabs.innerHTML = '<span class="note" style="align-self:center">同じ合計金額になる組み合わせが複数あります。パターン：</span>' +
       comboPatterns.map(function(p, i){
-        return '<button type="button" data-pat="' + i + '"' + (i === comboPatternIdx ? ' class="active"' : '') + '>パターン' + (i + 1) + '（' + p.length + '品）</button>';
+        return '<button type="button" data-pat="' + i + '"' + (i === comboPatternIdx ? ' class="active"' : '') + '>' + (i + 1) + '（' + p.length + '品）</button>';
       }).join("");
     Array.prototype.forEach.call(tabs.querySelectorAll("button"), function(b){
       b.addEventListener("click", function(){
