@@ -221,6 +221,7 @@
   <div class="result" id="comboResult">
     <p class="combo-label">▼ 組み合わせ結果</p>
     <p class="note" id="comboCityNote" style="margin:0 0 6px;"></p>
+    <div class="pagetabs" id="comboTabs" style="display:none"></div>
     <table>
       <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">評価（レビュー件数）</th></tr></thead>
       <tbody id="comboBody"></tbody>
@@ -589,6 +590,8 @@ function bestCombo(items, budget){
 
 let currentCombo = [];
 let currentPool = [];
+let comboPatterns = [];
+let comboPatternIdx = 0;
 
 // 同じ金額の品が複数あるときは、評価（同点ならレビュー件数）が高い方を優先する
 function preferHigherRated(combo, pool){
@@ -651,7 +654,94 @@ function itemCellHtml(it, extra){
 
 function dispNameHtml(it){ return it.name + (it.v ? ' <span class="vartag">選択で金額が変わります</span>' : ""); }
 
+// 合計が最大値と一致する組み合わせを、深さ優先で最大 maxCount 件まで列挙する
+function enumerateCombos(items, targetUnits, maxCount){
+  const unit = 100;
+  const groups = items.map(function(item){
+    return (item.opts && item.opts.length)
+      ? item.opts.map(function(o){ return Object.assign({}, item, { price: o[1], opt: o[0], base: item }); })
+      : [Object.assign({}, item, { opt: null, base: item })];
+  });
+  const gn = groups.length;
+  const suff = new Array(gn + 1);
+  suff[gn] = new Uint8Array(targetUnits + 1); suff[gn][0] = 1;
+  for(let i = gn - 1; i >= 0; i--){
+    const cur = suff[i + 1].slice();
+    const seenW = {};
+    groups[i].forEach(function(e){
+      const w = Math.round(e.price / unit);
+      if(w > targetUnits || seenW[w]) return; seenW[w] = 1;
+      for(let s = 0; s + w <= targetUnits; s++){ if(suff[i + 1][s]) cur[s + w] = 1; }
+    });
+    suff[i] = cur;
+  }
+  const results = [];
+  const chosen = [];
+  let nodes = 0;
+  function dfs(i, rem){
+    if(results.length >= maxCount || nodes > 300000) return;
+    nodes++;
+    if(rem === 0){ results.push(chosen.slice()); return; }
+    if(i >= gn || !suff[i][rem]) return;
+    const entries = groups[i].slice().sort(function(a, b){
+      return (b.rating || 0) - (a.rating || 0) || (b.reviews || 0) - (a.reviews || 0);
+    });
+    const triedW = {};
+    entries.forEach(function(e){
+      const w = Math.round(e.price / unit);
+      if(w > rem || triedW[w]) return; triedW[w] = 1;
+      if(suff[i + 1][rem - w]){
+        chosen.push(e);
+        dfs(i + 1, rem - w);
+        chosen.pop();
+      }
+    });
+    if(suff[i + 1][rem]) dfs(i + 1, rem);
+  }
+  dfs(0, targetUnits);
+  return results;
+}
+
+function comboKey(c){
+  return c.map(function(e){ return e.base.name + "|" + (e.opt || "") + "|" + e.price; }).sort().join(";");
+}
+
+// 1件目は従来どおりの組み合わせ。同じ合計金額になる別の組み合わせを最大で合計5パターンまで集める
+function computeComboPatterns(poolItems){
+  const first = preferHigherRated(bestCombo(poolItems, currentRemaining), currentPool);
+  const patterns = [first];
+  const seen = new Set([comboKey(first)]);
+  const target = first.reduce(function(a, e){ return a + e.price; }, 0) / 100;
+  if(target > 0){
+    const raw = enumerateCombos(poolItems, target, 40);
+    for(let i = 0; i < raw.length && patterns.length < 5; i++){
+      const p = preferHigherRated(raw[i].slice(), currentPool);
+      const k = comboKey(p);
+      if(!seen.has(k)){ seen.add(k); patterns.push(p); }
+    }
+  }
+  return patterns;
+}
+
 function renderCombo(){
+  const tabs = document.getElementById("comboTabs");
+  if(comboPatterns.length > 1){
+    tabs.style.display = "flex";
+    tabs.innerHTML = '<span class="note" style="align-self:center">同じ合計金額になる組み合わせが' + comboPatterns.length + 'パターンあります：</span>' +
+      comboPatterns.map(function(p, i){
+        return '<button type="button" data-pat="' + i + '"' + (i === comboPatternIdx ? ' class="active"' : '') + '>パターン' + (i + 1) + '（' + p.length + '品）</button>';
+      }).join("");
+    Array.prototype.forEach.call(tabs.querySelectorAll("button"), function(b){
+      b.addEventListener("click", function(){
+        comboPatternIdx = parseInt(b.getAttribute("data-pat"), 10);
+        currentCombo = comboPatterns[comboPatternIdx];
+        renderCombo();
+      });
+    });
+  } else {
+    tabs.style.display = "none";
+    tabs.innerHTML = "";
+  }
   const body = document.getElementById("comboBody");
   body.innerHTML = "";
   let sum = 0;
@@ -744,7 +834,9 @@ document.getElementById("comboBtn").addEventListener("click", function(){
   if(checked.length === 0){ showComboNotice("ジャンルを1つ以上選んでください。"); return; }
   const poolItems = ITEMS.filter(function(it){ return checked.indexOf(it.genre) >= 0; });
   currentPool = expandEntries(poolItems);
-  currentCombo = preferHigherRated(bestCombo(poolItems, currentRemaining), currentPool);
+  comboPatterns = computeComboPatterns(poolItems);
+  comboPatternIdx = 0;
+  currentCombo = comboPatterns[0];
   renderCombo();
   hideComboNotice();
   document.getElementById("comboResult").style.display = "block";
@@ -753,7 +845,7 @@ document.getElementById("comboBtn").addEventListener("click", function(){
 
 const copyBtn = document.getElementById("copyBtn");
 copyBtn.addEventListener("click", function(){
-  const lines = ["【限界ふるさと納税】返礼品の組み合わせ（予算 " + currentRemaining.toLocaleString() + "円）"];
+  const lines = ["【限界ふるさと納税】返礼品の組み合わせ（予算 " + currentRemaining.toLocaleString() + "円）" + (comboPatterns.length > 1 ? "・パターン" + (comboPatternIdx + 1) : "")];
   let sum = 0;
   currentCombo.forEach(function(it){
     sum += it.price;
