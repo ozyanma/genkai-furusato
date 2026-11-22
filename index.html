@@ -15,7 +15,7 @@
 <style>
   :root{ --main:#c0392b; --accent:#e67e22; --bg:#fdf8f3; --card:#fff; --text:#333; --muted:#666; --line:#e8ddd2; }
   *{ box-sizing:border-box; }
-  body{ margin:0; font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif; background:var(--bg); color:var(--text); line-height:1.7; }
+  body{ overflow-x:clip; margin:0; font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif; background:var(--bg); color:var(--text); line-height:1.7; }
   header{ background:var(--main); color:#fff; padding:28px 16px 22px; text-align:center; }
   header h1{ margin:0 0 6px; font-size:1.55rem; }
   header p{ margin:0; font-size:.92rem; opacity:.92; }
@@ -26,7 +26,8 @@
   label{ display:block; font-weight:600; margin:12px 0 4px; font-size:.95rem; }
   label small{ font-weight:400; color:var(--muted); }
   input[type=number], input[type=search], select{ width:100%; padding:10px; font-size:1rem; border:1px solid #ccc; border-radius:8px; background:#fff; }
-  .row{ display:flex; gap:12px; } .row > div{ flex:1; }
+  .row{ display:flex; gap:12px; } .row > div{ flex:1; display:flex; flex-direction:column; }
+  .row > div input, .row > div select{ margin-top:auto; }
   button{ display:block; width:100%; margin-top:18px; padding:13px; font-size:1.05rem; font-weight:700; color:#fff; background:var(--main); border:none; border-radius:9px; cursor:pointer; }
   button.sub{ background:var(--accent); }
   button.mini{ display:inline-block; width:auto; margin-top:0; padding:6px 14px; font-size:.88rem; background:#fff; color:var(--main); border:1.5px solid var(--main); }
@@ -56,6 +57,11 @@
     .catalog-table td{ display:inline; border-bottom:none; padding:1px 6px 1px 0; }
     .catalog-table td:first-child{ display:block; padding-bottom:3px; }
     .catalog-table td:nth-child(2)::after{ content:" ／ "; color:var(--muted); }
+    .combo-table thead{ display:none; }
+    .combo-table tr{ display:block; padding:8px 2px; }
+    .combo-table td{ display:inline; border-bottom:none; padding:1px 6px 1px 0; }
+    .combo-table td:first-child{ display:block; padding-bottom:3px; }
+    .combo-table td:nth-child(2)::after{ content:" ／ "; color:var(--muted); }
     .modal-card{ padding:12px; }
     .modal-card table{ font-size:.85rem; }
     .modal-card th, .modal-card td{ padding:6px 4px; }
@@ -222,7 +228,7 @@
     <p class="combo-label">▼ 組み合わせ結果</p>
     <p class="note" id="comboCityNote" style="margin:0 0 6px;"></p>
     <div class="pagetabs" id="comboTabs" style="display:none"></div>
-    <table>
+    <table class="combo-table">
       <thead><tr><th>返礼品</th><th>ジャンル</th><th class="price">寄附額</th><th class="price">評価（レビュー件数）</th></tr></thead>
       <tbody id="comboBody"></tbody>
     </table>
