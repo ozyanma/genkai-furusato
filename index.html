@@ -145,25 +145,6 @@
   <p class="note">15歳以下のお子さんは限度額に影響しないため、入力は不要です。</p>
 
   <details>
-    <summary>住民税決定通知書がある方はこちら（より正確な計算）</summary>
-    <div class="row">
-      <div>
-        <label>住民税の所得割額（円）</label>
-        <input type="number" id="shotokuwari" inputmode="numeric" placeholder="例：238000" min="0">
-      </div>
-      <div>
-        <label>所得税率</label>
-        <select id="rate">
-          <option value="0.05">5%</option><option value="0.10">10%</option>
-          <option value="0.20" selected>20%</option><option value="0.23">23%</option>
-          <option value="0.33">33%</option><option value="0.40">40%</option><option value="0.45">45%</option>
-        </select>
-      </div>
-    </div>
-    <p class="note">所得割額は、毎年5〜6月に届く住民税決定通知書の「所得割額」の欄（市町村民税＋都道府県民税の合計）です。入力すると、年収からの概算よりこちらを優先します。</p>
-  </details>
-
-  <details>
     <summary>iDeCo・保険料控除がある方はこちら（年収からの概算に反映）</summary>
     <div class="row">
       <div>
@@ -183,6 +164,25 @@
       <div></div>
     </div>
     <p class="note">iDeCoの掛金は全額が所得控除になります。生命保険料控除は住民税で最大7万円・所得税で最大12万円、地震保険料控除は住民税で最大2万5千円・所得税で最大5万円として計算します。控除額は源泉徴収票で確認できます。住民税の所得割額を入力した場合はそちらが優先され、控除はすでに所得割額に含まれているため、こちらは反映されません。</p>
+  </details>
+
+  <details>
+    <summary>住民税決定通知書がある方はこちら（より正確な計算）</summary>
+    <div class="row">
+      <div>
+        <label>住民税の所得割額（円）</label>
+        <input type="number" id="shotokuwari" inputmode="numeric" placeholder="例：238000" min="0">
+      </div>
+      <div>
+        <label>所得税率</label>
+        <select id="rate">
+          <option value="0.05">5%</option><option value="0.10">10%</option>
+          <option value="0.20" selected>20%</option><option value="0.23">23%</option>
+          <option value="0.33">33%</option><option value="0.40">40%</option><option value="0.45">45%</option>
+        </select>
+      </div>
+    </div>
+    <p class="note">所得割額は、毎年5〜6月に届く住民税決定通知書の「所得割額」の欄（市町村民税＋都道府県民税の合計）です。入力すると、年収からの概算よりこちらを優先します。</p>
   </details>
 
   <button id="calcBtn">限度額を計算する</button>
