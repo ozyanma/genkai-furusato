@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://genkai-furusato.mini-tools.workers.dev/sitemap.xml
